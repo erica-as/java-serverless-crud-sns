@@ -6,23 +6,21 @@
   "dockerComposeFile": [
     "docker-compose.yml"
   ],
+
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "remoteEnv": {
+    "PATH": "/home/vscode/.sdkman/candidates/maven/current/bin:${containerEnv:PATH}"
+  },
 
   "customizations": {
     "vscode": {
       "extensions": [
         "vscjava.vscode-java-pack",
         "ms-azuretools.vscode-docker",
-        "ms-toolsai.jupyter",
-        "42Crunch.vscode-openapi",
         "amazonwebservices.aws-toolkit"
       ]
     }
-  },
-
-  "remoteUser": "vscode",
-  "remoteEnv": {
-    "PATH": "/home/vscode/.sdkman/candidates/maven/current/bin:${containerEnv:PATH}"
   },
 
   "postCreateCommand": "npm install -g serverless && npm install -g serverless-localstack",
