@@ -10,7 +10,7 @@
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   "remoteEnv": {
-    "PATH": "/home/vscode/.sdkman/candidates/maven/current/bin:${containerEnv:PATH}"
+    "PATH": "/home/vscode/.sdkman/candidates/maven/current/bin:/usr/local/share/npm-global/bin:${containerEnv:PATH}"
   },
 
   "customizations": {
