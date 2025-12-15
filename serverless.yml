@@ -1,0 +1,105 @@
+service: puc-serverless-crud-sns-java
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  # Define o runtime para Java 17
+  runtime: java17
+  stage: local
+  region: us-east-1
+  # CRUCIAL: Configuração para LocalStack
+  endpoint: http://localstack:4566
+  environment:
+    DYNAMODB_TABLE: MyItemsTable
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:ItemEventsTopic
+
+  # Define as permissões básicas para as funções acessarem os recursos
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - sns:Publish
+          Resource: "*" # Em produção, defina o ARN específico
+
+package:
+  # Caminho e nome do JAR criado pelo Maven Shade Plugin
+  artifact: target/crud-serverless-java-app.jar
+
+plugins:
+  - serverless-localstack
+  - serverless-offline # Útil para testar funções Lambdas localmente
+
+functions:
+  # 1. POST /items (CREATE + SNS)
+  createItem:
+    handler: com.pucminas.app.handler.CreateItemHandler
+    events:
+      - http:
+          path: items
+          method: post
+          cors: true
+
+  # 2. GET /items e GET /items/{id} (READ)
+  getItem:
+    handler: com.pucminas.app.handler.GetItemHandler
+    events:
+      - http:
+          path: items
+          method: get
+          cors: true
+      - http:
+          path: items/{id}
+          method: get
+          cors: true
+
+  # 3. PUT /items/{id} (UPDATE + SNS)
+  updateItem:
+    handler: com.pucminas.app.handler.UpdateItemHandler
+    events:
+      - http:
+          path: items/{id}
+          method: put
+          cors: true
+
+  # 4. DELETE /items/{id} (DELETE)
+  deleteItem:
+    handler: com.pucminas.app.handler.DeleteItemHandler
+    events:
+      - http:
+          path: items/{id}
+          method: delete
+          cors: true
+
+  # 5. SUBSCRIBER (Recebe notificações SNS)
+  notificationSubscriber:
+    handler: com.pucminas.app.handler.NotificationSubscriberHandler
+    events:
+      # Aciona a função quando uma mensagem é publicada no tópico
+      - sns: ItemEventsTopic
+
+resources:
+  Resources:
+    # Tabela DynamoDB
+    ItemsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # Tópico SNS
+    ItemEventsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ItemEventsTopic

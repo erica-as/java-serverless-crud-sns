@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      # Expõe a porta de serviços (4566) e o console (4500)
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4500:4500"
+    environment:
+      # Habilita os serviços necessários
+      SERVICES: dynamodb,lambda,apigateway,sns
+      # Necessário para o Java SDK v2 encontrar o LocalStack dentro do Docker
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
