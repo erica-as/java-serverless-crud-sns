@@ -1,0 +1,33 @@
+// .devcontainer/devcontainer.json
+{
+  "name": "Java Serverless (Maven + LocalStack)",
+
+  // Use uma imagem base com Java e Maven já instalados
+  "image": "mcr.microsoft.com/devcontainers/java:17-bullseye",
+
+  // Inclui o serviço LocalStack definido no docker-compose.yml
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "service": "codespace-server", // O Codespace usará esta imagem como base
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  // Plugins e Ferramentas Adicionais (Serverless Framework e AWS CLI)
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "42Crunch.vscode-openapi",
+        "amazonwebservices.aws-toolkit" // AWS Toolkit é útil para ver logs
+      ]
+    }
+  },
+
+  // Comandos que são executados após o ambiente estar pronto
+  "postCreateCommand": "npm install -g serverless && npm install -g serverless-localstack",
+
+  // Mapeia as portas que você precisará acessar externamente (para o cURL)
+  "forwardPorts": [4566]
+}
